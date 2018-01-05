@@ -1,3 +1,14 @@
 ﻿{
-  
+  "ConnectionStrings": {
+    "DutchConnectionString":"server=127.0.0.1,3306;database=DutchTreatDb;User id=root; password=MyStronPassw0rd;"
+  }
 }
+
+//0.0.0.0:1401->1433/tcp 
+
+//"server=(localdb)\\ProjectsV13;Database=DutchTreatDb;Integrated Security=true;MultipleActiveResultSets=true;" 
+
+//"Data Source=localhost:1401; Initial Catalog=sql1;User id=SA; password=MyStrong!Passw0rd;"
+
+
+// "DutchConnectionString":"Data Source=localhost:3306;Database=DutchTreatDb;User id=root; password=MyStronPassw0rd;"

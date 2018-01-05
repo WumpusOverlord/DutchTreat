@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -10,26 +11,16 @@ namespace DutchTreat.ViewModels
     // You may need to install the Microsoft.AspNetCore.Http.Abstractions package into your project
     public class ContactViewModel
     {
-        private readonly RequestDelegate _next;
-
-        public ContactViewModel(RequestDelegate next)
-        {
-            _next = next;
-        }
-
-        public Task Invoke(HttpContext httpContext)
-        {
-
-            return _next(httpContext);
-        }
+        [Required]
+        [MinLength(5)]
+        public string Name { get; set; }
+        [Required]
+        public string Email { get; set; }
+        [Required]
+        public string Subject { get; set; }
+        [Required]
+        [MaxLength(800, ErrorMessage = "Too Long")]
+        public string Message { get; set; }
     }
 
-    // Extension method used to add the middleware to the HTTP request pipeline.
-    public static class ContactViewModelExtensions
-    {
-        public static IApplicationBuilder UseMiddlewareClassTemplate(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<ContactViewModel>();
-        }
-    }
 }
