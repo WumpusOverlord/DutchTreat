@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using DutchTreat.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,7 @@ using DutchTreat.Services;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace DutchTreat
 {
@@ -31,14 +33,30 @@ namespace DutchTreat
         public void ConfigureServices(IServiceCollection services)
         {
          
-            services.AddTransient<IMailService, NullMailService>();
-            services.AddMvc();
+            //scoped services are cached for reuse so you get the same instance of the object
+            //singleton is shared for lifetime of app so resource heavy
+
+            services.AddAutoMapper();
             
-            //to-do: add support for real mail service
+            
             var connectionString = _config.GetConnectionString("DutchConnectionString");
             services.AddDbContext<DutchContext>(cfg => 
                 cfg.UseNpgsql(connectionString)
             );
+            
+            services.AddTransient<IMailService, NullMailService>();
+            services.AddTransient<DutchSeeder>();
+
+            
+            //interface first as add Idutchrepo as services but uses the imolemention of DutchRepo
+            services.AddScoped<IDutchRepository, DutchRepository>();
+
+
+            services.AddMvc()
+                .AddJsonOptions(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+
+
+            //to-do: add support for real mail service
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -66,13 +84,15 @@ namespace DutchTreat
                              "{controller}/{action}/{id?}",
                              new { controller = "App", Action = "Index"});
             });
-  
-          
 
-            //app.Run(async (context) =>
-            //{
-            //    await context.Response.WriteAsync("Hello World!");
-            //});
+            if (env.IsDevelopment())
+            {
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    var seeder = scope.ServiceProvider.GetService<DutchSeeder>();
+                    seeder.Seed();
+                }
+            }
         }
     }
 }
